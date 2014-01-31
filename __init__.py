@@ -15,157 +15,79 @@ SHORT_URL_DOMAINS = [
 ]
 
 REGEX_PROVIDERS = [
-    {
-        u'hostname': ('www.youtube.com',),
-        u'regex': [
-            'regex:.*youtube\.com/watch.*',
-            'regex:.*youtube\.com/playlist.*'
-        ],
-        u'endpoint':'http://www.youtube.com/oembed',
-    },
-    {
-        u'hostname': ('www.flickr.com',),
-        u'regex': ['http://*.flickr.com/*'],
-        u'endpoint':'http://www.flickr.com/services/oembed',
-    },
-    {
-        u'hostname': ('qik.com',),
-        u'regex': ['http://qik.com/video/*', 'http://qik.com/*'],
-        u'endpoint':'http://qik.com/api/oembed.%s',
-    },
-    {
-        u'hostname': ('revision3.com',),
-        u'regex': ['http://*revision3.com/*'],
-        u'endpoint':'http://revision3.com/api/oembed/',
-    },
-    {
-        u'hostname': ('www.hulu.com',),
-        u'regex': ['http://www.hulu.com/watch/*'],
-        u'endpoint':'http://www.hulu.com/api/oembed.%s',
-    },
-    {
-        u'hostname': ('vimeo.com',),
-        u'regex': ['http://vimeo.com/*', 'https://vimeo.com/*'],
-        u'endpoint':'http://vimeo.com/api/oembed.%s',
-    },
-    {
-        u'hostname': ('www.collegehumor.com',),
-        u'regex': ['http://www.collegehumor.com/video/*'],
-        u'endpoint':'http://www.collegehumor.com/oembed.%s',
-    },
-    {
-        u'hostname': ('www.polleverywhere.com',),
-        u'regex': ['http://www.polleverywhere.com/polls/*',
-                   'http://www.polleverywhere.com/multiple_choice_polls/*',
-                   'http://www.polleverywhere.com/free_text_polls/*'],
-        u'endpoint':'http://www.polleverywhere.com/services/oembed/',
-    },
-    {
-        u'hostname': ('www.ifixit.com',),
-        u'regex': ['http://www.ifixit.com/*'],
-        u'endpoint':'http://www.ifixit.com/Embed',
-    },
-    {
-        u'hostname': ('smugmug.com', 'www.smugmug.com'),
-        u'regex': ['http://*.smugmug.com/*'],
-        u'endpoint':'http://api.smugmug.com/services/oembed/',
-    },
-    {
-        u'hostname': ('www.slideshare.net', 'fr.slideshare.net'),
-        u'regex': ['http://www.slideshare.net/*/*'],
-        u'endpoint':'http://www.slideshare.net/api/oembed/2',
-    },
-    {
-        u'hostname': ('www.23hq.com',),
-        u'regex': ['http://www.23hq.com/*/photo/*'],
-        u'endpoint':'http://www.23hq.com/23/oembed',
-    },
-    {
-        u'hostname': ('www.5min.com',),
-        u'regex': ['http://www.5min.com/Video/*'],
-        u'endpoint':'http://api.5min.com/oembed.%s',
-    },
-    {
-        u'hostname': ('twitter.com',),
-        u'regex': ['https://twitter.com/*/status*/*'],
-        u'endpoint':'https://api.twitter.com/1/statuses/oembed.%s',
-    },
-    {
-        u'hostname': ('photobucket.com', 'img.photobucket.com'),
-        #http://pic.pbsrc.com/dev_help/Metadata/Metadata_Discovery.htm
-        u'regex': ['regex:.*photobucket\\.com/(albums|groups)/.+$'],
-        u'endpoint':'http://photobucket.com/oembed',
-    },
-    {
-        u'hostname': ('www.dailymotion.com',),
-        #http://www.dailymotion.com/doc/api/oembed.html
-        u'regex': ['http://www.dailymotion.com/video/*'],
-        u'endpoint':'http://www.dailymotion.com/services/oembed',
-    },
-    {
-        u'hostname': ('clikthrough.com', 'www.clikthrough.com'),
-        u'regex': ['http://*.clikthrough.com/theater/video/*'],
-        u'endpoint':'http://clikthrough.com/services/oembed',
-    },
-    {
-        u'hostname': ('dotsub.com',),
-        #http://solutions.dotsub.com/oEmbed
-        u'regex': ['http://dotsub.com/view/*'],
-        u'endpoint':'http://dotsub.com/services/oembed',
-    },
-    {
-        u'hostname': ('blip.tv',),
-        # blit.tv sends an invalid mime-type back
-        u'regex': ['http://*blip.tv/*'],
-        u'endpoint':'http://blip.tv/oembed/',
-    },
-    {
-        u'hostname': ('official.fm',),
-        #http://official.fm/developers/oembed
-        u'regex': [
-            'http://official.fm/tracks/*',
-            'http://official.fm/playlists/*'
-        ],
-        u'endpoint':'http://official.fm/services/oembed.%s',
-    },
-    {
-        u'hostname': ('vhx.tv',),
-        #http://dev.vhx.tv/oembed.html
-        u'regex': ['http://vhx.tv/*'],
-        u'endpoint':'http://vhx.tv/services/oembed.%s',
-    },
-    {
-        u'hostname': ('www.nfb.ca',),
-        u'regex': ['http://*.nfb.ca/film/*'],
-        u'endpoint':'http://www.nfb.ca/remote/services/oembed/',
-    },
-    {
-        u'hostname': ('instagr.am', 'instagram.com'),
-        #http://instagr.am/developer/embedding/
-        u'regex': ['http://instagr.am/p/*', 'http://instagr.am/p/*',
-                   'http://instagram.com/p/'],
-        u'endpoint': 'http://api.instagram.com/oembed',
-    },
-    {
-        u'hostname': ('wordpress.tv',),
-        u'regex': ['http://wordpress.tv/*'],
-        u'endpoint': 'http://wordpress.tv/oembed/',
-    },
-    {
-        u'hostname': ('soundcloud.com', 'snd.sc'),
-        u'regex': [
-            'http://soundcloud.com/*', 'http://soundcloud.com/*/*',
-            'http://soundcloud.com/*/sets/*', 'http://soundcloud.com/groups/*',
-            'http://snd.sc/*', 'https://soundcloud.com/*'
-        ],
-        u'endpoint': 'http://soundcloud.com/oembed',
-    },
-    {
-        u'hostname': ('www.screenr.com',),
-        #http://blog.screenr.com/post/2145539209/screenr-now-supports-oembed
-        u'regex': ['http://www.screenr.com/*', 'http://screenr.com/*'],
-        u'endpoint': 'http://www.screenr.com/api/oembed.%s',
-    },
+    dict(hostname=('www.youtube.com',), regex=[
+        'regex:.*youtube\.com/watch.*',
+        'regex:.*youtube\.com/playlist.*'
+    ], endpoint='http://www.youtube.com/oembed'),
+    dict(hostname=('www.flickr.com',), regex=['http://*.flickr.com/*'],
+         endpoint='http://www.flickr.com/services/oembed'),
+    dict(hostname=('qik.com',),
+         regex=['http://qik.com/video/*', 'http://qik.com/*'],
+         endpoint='http://qik.com/api/oembed.%s'),
+    dict(hostname=('revision3.com',), regex=['http://*revision3.com/*'],
+         endpoint='http://revision3.com/api/oembed/'),
+    dict(hostname=('www.hulu.com',), regex=['http://www.hulu.com/watch/*'],
+         endpoint='http://www.hulu.com/api/oembed.%s'),
+    dict(hostname=('vimeo.com',),
+         regex=['http://vimeo.com/*', 'https://vimeo.com/*'],
+         endpoint='http://vimeo.com/api/oembed.%s'),
+    dict(hostname=('www.collegehumor.com',),
+         regex=['http://www.collegehumor.com/video/*'],
+         endpoint='http://www.collegehumor.com/oembed.%s'),
+    dict(hostname=('www.polleverywhere.com',),
+         regex=['http://www.polleverywhere.com/polls/*',
+                'http://www.polleverywhere.com/multiple_choice_polls/*',
+                'http://www.polleverywhere.com/free_text_polls/*'],
+         endpoint='http://www.polleverywhere.com/services/oembed/'),
+    dict(hostname=('www.ifixit.com',), regex=['http://www.ifixit.com/*'],
+         endpoint='http://www.ifixit.com/Embed'),
+    dict(hostname=('smugmug.com', 'www.smugmug.com'),
+         regex=['http://*.smugmug.com/*'],
+         endpoint='http://api.smugmug.com/services/oembed/'),
+    dict(hostname=('www.slideshare.net', 'fr.slideshare.net'),
+         regex=['http://www.slideshare.net/*/*'],
+         endpoint='http://www.slideshare.net/api/oembed/2'),
+    dict(hostname=('www.23hq.com',), regex=['http://www.23hq.com/*/photo/*'],
+         endpoint='http://www.23hq.com/23/oembed'),
+    dict(hostname=('www.5min.com',), regex=['http://www.5min.com/Video/*'],
+         endpoint='http://api.5min.com/oembed.%s'),
+    dict(hostname=('twitter.com',), regex=['https://twitter.com/*/status*/*'],
+         endpoint='https://api.twitter.com/1/statuses/oembed.%s'),
+    dict(hostname=('photobucket.com', 'img.photobucket.com'),
+         regex=['regex:.*photobucket\\.com/(albums|groups)/.+$'],
+         endpoint='http://photobucket.com/oembed'),
+    dict(hostname=('www.dailymotion.com',),
+         regex=['http://www.dailymotion.com/video/*'],
+         endpoint='http://www.dailymotion.com/services/oembed'),
+    dict(hostname=('clikthrough.com', 'www.clikthrough.com'),
+         regex=['http://*.clikthrough.com/theater/video/*'],
+         endpoint='http://clikthrough.com/services/oembed'),
+    dict(hostname=('dotsub.com',), regex=['http://dotsub.com/view/*'],
+         endpoint='http://dotsub.com/services/oembed'),
+    dict(hostname=('blip.tv',), regex=['http://*blip.tv/*'],
+         endpoint='http://blip.tv/oembed/'),
+    dict(hostname=('official.fm',), regex=[
+        'http://official.fm/tracks/*',
+        'http://official.fm/playlists/*'
+    ], endpoint='http://official.fm/services/oembed.%s'),
+    dict(hostname=('vhx.tv',), regex=['http://vhx.tv/*'],
+         endpoint='http://vhx.tv/services/oembed.%s'),
+    dict(hostname=('www.nfb.ca',), regex=['http://*.nfb.ca/film/*'],
+         endpoint='http://www.nfb.ca/remote/services/oembed/'),
+    dict(hostname=('instagr.am', 'instagram.com'),
+         regex=['http://instagr.am/p/*', 'http://instagr.am/p/*',
+                'http://instagram.com/p/'],
+         endpoint='http://api.instagram.com/oembed'),
+    dict(hostname=('wordpress.tv',), regex=['http://wordpress.tv/*'],
+         endpoint='http://wordpress.tv/oembed/'),
+    dict(hostname=('soundcloud.com', 'snd.sc'), regex=[
+        'http://soundcloud.com/*', 'http://soundcloud.com/*/*',
+        'http://soundcloud.com/*/sets/*', 'http://soundcloud.com/groups/*',
+        'http://snd.sc/*', 'https://soundcloud.com/*'
+    ], endpoint='http://soundcloud.com/oembed'),
+    dict(hostname=('www.screenr.com',),
+         regex=['http://www.screenr.com/*', 'http://screenr.com/*'],
+         endpoint='http://www.screenr.com/api/oembed.%s'),
 ]
 
 
@@ -175,13 +97,30 @@ class Consumer():
         self.consumer = oembed.OEmbedConsumer()
         self.init_endpoints(self.consumer, self.format)
 
-    def get_oembed(self, url):
-        url = self.unshort_url(url)
-        response = self.consumer.embed(url)
+    def get_oembed(self, req_url):
+        """
+        Takes an URL, queries the corresponding endpoint and return a dict
+        with the oembed data
+
+        @param req_url: The url to query
+        @type req_url: str
+        @return: The oembed dict
+        @rtype: dict
+        """
+        req_url = self.unshort_url(req_url)
+        response = self.consumer.embed(req_url)
         return response.getData()
 
     @staticmethod
     def init_endpoints(selfconsumer, req_format):
+        """
+        Add all the endpoints to the OEmbedConsumer object
+
+        @param selfconsumer: the OEmbedConsumer object
+        @type selfconsumer: object
+        @param req_format: request format, currently only JSON
+        @type req_format: str
+        """
         for provider in REGEX_PROVIDERS:
             try:
                 endpoint_url = provider[u'endpoint'] % req_format
@@ -195,6 +134,14 @@ class Consumer():
 
     @staticmethod
     def unshort_url(geturl):
+        """
+        Open a shortened url and return the original url
+
+        @param geturl: shortened url
+        @type geturl: str
+        @return: the unchortened url
+        @rtype: str
+        """
         host = urlsplit(geturl)[1]
 
         if host in SHORT_URL_DOMAINS:
@@ -207,7 +154,7 @@ class Consumer():
         return geturl
 
 if __name__ == "__main__":
-    consumer = Consumer(req_format="json")
+    consumer = Consumer()
     test_urls = [
         'https://www.youtube.com/watch?v=KdWUZ_49-Ck',
         'https://www.youtube.com/watch?v=V_ho5Y-Yw8g',
