@@ -4,31 +4,64 @@ Python Oembed Consumer
 This module uses Python-oembed (https://github.com/abarmat/python-oembed) to provide a simple consumer wich supports several Oembed providers.
 
 Currently the following sites are supported:
-* Youtube (http://www.youtube.com/)
-* Flickr (http://www.flickr.com/)
-* Qik (http://qik.com/)
-* Revision 3 (http://revision3.com/)
-* Hulu (http://www.hulu.com/)
-* Vimeo (https://vimeo.com/)
-* College Humor (http://www.collegehumor.com/)
-* Poll Everywhere (http://www.polleverywhere.com/)
-* I Fix It (http://www.ifixit.com/)
-* SmugMug (http://www.smugmug.com/)
-* Slide Share (http://www.slideshare.net/)
-* 23 HQ (http://www.23hq.com/)
-* 5min (http://www.5min.com)
-* Twitter (http://www.twitter.com)
-* Photobucket (http://www.photobucket.com)
-* Daily Motion (http://www.dailymotion.com)
-* Click Through (http://new.clikthrough.com/)
-* Dot Sub (http://dotsub.com/)
-* Blip (http://blip.tv/)
-* VHX (http://VHX.tv/)
-* National Film Board of Canada (http://www.nfb.ca/)
-* Instagram (http://instagram.com)
-* Wordpress TV (http://wordpress.tv/)
-* SoundCloud (http://soundcloud.com/)
-* Screenr (http://www.screenr.com/)
+
+* app.net - link
+* wordpress.com - link
+* deviantart.com - photo
+* geo-en.hlipp.de - photo
+* geograph.org.gg - photo
+* geograph.org.uk - photo
+* gmep.org - photo
+* instagr.am - photo
+* smugmug.com - photo
+* www.23hq.com - photo
+* www.flickr.com - photo
+* www.mobypicture.com - photo
+* ifttt.com - rich
+* cacoo.com - rich
+* chirb.it - rich
+* crowdranking.com - rich
+* huffduffer.com - rich
+* meetup.com - rich
+* official.fm - rich
+* rdio.com - rich
+* roomshare.jp - rich
+* shoudio.com - rich
+* sketchfab.com - rich
+* soundcloud.com - rich
+* speakerdeck.com - rich
+* twitter.com - rich
+* www.circuitlab.com - rich
+* www.dailymile.com - rich
+* www.dipity.com - rich
+* www.ifixit.com - rich
+* www.kickstarter.com - rich
+* www.mixcloud.com - rich
+* www.polleverywhere.com - rich
+* www.slideshare.net - rich
+* animoto.com - video
+* aol.com - video
+* blip.tv - video
+* dotsub.com - video
+* justin.tv - video
+* revision3.com - video
+* sapo.pt - video
+* ted.com - video
+* ustream.tv - video
+* vimeo.com - video
+* wordpress.tv - video
+* www.collegehumor.com - video
+* www.dailymotion.com - video
+* www.funnyordie.com - video
+* www.hulu.com - video
+* www.jest.com - video
+* www.nfb.ca - video
+* www.screenr.com - video
+* www.viddler.com - video
+* www.videojug.com - video
+* www.youtube.com - video
+* yandex.ru - video
+
 
 Installation
 ------------
