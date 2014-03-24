@@ -1,10 +1,46 @@
 # -*- coding: utf-8 -*-
+import urllib2
+from bs4 import BeautifulSoup
+from python_recipes import unique_from_array, validate_url, get_url_domain
+
 __author__ = 'velocidad'
 from urllib2 import urlopen, URLError
 from urlparse import urlsplit
 
 # noinspection PyPackageRequirements
+
 import oembed
+
+FAILED_EXPECTATIONS = "One of the required parameters is not valid or is " \
+                      "missing"
+
+OEMBED_DATA_MISMATCH = "The returned oEmbed type is not the required type"
+
+REMOTE_SERVER_ERROR = "The remote service has encountered an error"
+
+OEMBED_ERRORS = {
+    "failed_expectations": {
+        "code": 2419,
+        "message": FAILED_EXPECTATIONS,
+        "type": "error"
+    },
+    "oembed_data_mismatch": {
+        "code": 2420,
+        "message": OEMBED_DATA_MISMATCH,
+        "type": "error"
+    },
+    "remote_server_error": {
+        "code": 2421,
+        "message": REMOTE_SERVER_ERROR,
+        "type": "error"
+    }
+}
+
+IMAGE_EXT = ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'svg']
+VIDEO_EXT = ['mp4', 'ogg']
+AUDIO_EXT = ['mp3', 'ogg', 'wav', 'aac', 'aiff']
+PAGE_EXT = ['html', 'jsp', 'php', 'asp', 'aspx', 'htm', 'cgi', 'xhtml',
+            'asx', 'do', 'jspx']
 
 SHORT_URL_DOMAINS = [
     'tinyurl.com',
@@ -310,24 +346,77 @@ class Consumer(object):
         self.consumer = oembed.OEmbedConsumer()
         self.init_endpoints()
 
-    def get_oembed(self, req_url):
+    def get_oembed(self, req_url, embed_type=""):
         """
-        Takes an URL, queries the corresponding endpoint and return a dict
-        with the oembed data
+        Takes an URL, queries the corresponding endpoint and return a tuple
+        with the oembed data in a dict and a 200 code in case of a successful
+        retrieval or a dict containing the error description and a 400 code
 
         @param req_url: The url to query
         @type req_url: str
+        @param embed_type: the expected response type of the oEmbed
+        @type embed_type: str
         @return: The oembed dict
         @rtype: dict
         """
         req_url = self.unshort_url(req_url)
 
-        if "wordpress" in req_url:
-            extra = {'for': 'me'}
-            response = self.consumer.embed(req_url, opt=extra)
+        try:
+            if "wordpress" in req_url:
+                extra = {'for': 'me'}
+                response = self.consumer.embed(req_url, opt=extra)
+            else:
+                response = self.consumer.embed(req_url)
+        except oembed.OEmbedNoEndpoint:
+            #No oembed provider
+
+            #check if is a file url
+            ext = req_url.split('.')
+            #up to 4 letter ext
+            ext = ext[-1].lower()
+            if len(ext) < 5:
+                _next = False
+                if ext in AUDIO_EXT and embed_type == 'audio':
+                    _next = True
+                elif ext in VIDEO_EXT and embed_type == 'video':
+                    _next = True
+                elif ext in IMAGE_EXT and embed_type == 'photo':
+                    _next = True
+                elif embed_type == 'link' or embed_type == '':
+                    _next = True
+                    embed_type = 'link'
+
+                if _next:
+                    if ext in PAGE_EXT:
+                        embed, code = self.crawl_page(req_url)
+                        embed['type'] = embed_type
+                        data = (self.validate_metadata(embed), code)
+                    else:
+                        #form json for file
+                        data = self.json_for_link(req_url, embed_type)
+                else:
+                    data = (OEMBED_ERRORS['oembed_data_mismatch'], 400)
+
+            else:
+                if embed_type:
+                    if embed_type != 'link':
+                        data = (OEMBED_ERRORS['oembed_data_mismatch'], 400)
+                        return data
+                else:
+                    embed_type = 'link'
+                embed, code = self.crawl_page(req_url)
+                embed['type'] = embed_type
+                data = (self.validate_metadata(embed), code)
         else:
-            response = self.consumer.embed(req_url)
-        return response.getData()
+            embed = response.getData()
+            if embed_type:
+                if embed['type'] != embed_type:
+                    data = (OEMBED_ERRORS['oembed_data_mismatch'], 400)
+                    return data
+            embed = self.validate_metadata(embed)
+            data = (embed, 200)
+
+        return data
 
     def init_endpoints(self):
         """
@@ -362,7 +451,214 @@ class Consumer(object):
 
         return geturl
 
-if __name__ == "__main__":
+    def crawl_page(self, url):
+        """
+        Got to the url and tries to extract relevant data to form a response
+        like oEmbed
+        @param url: The url to extract info
+        @type url: str
+        @return: a tuple containing a dictionary with the basic oEmbed fields
+        and a response code 200 for success, 400 for errors
+        @rtype: tuple
+        """
+        req = urllib2.Request(url, headers={'User-Agent': "Magic Browser"})
+        response = urllib2.urlopen(req)
+        text = response.read()
+        code = response.getcode()
+        if 200 >= code < 400:
+            soup = BeautifulSoup(text)
+            title = soup.title.contents[0]
+            try:
+                subtitle = soup.h1.contents[0].text
+            except AttributeError:
+                subtitle = ""
+            images = self.get_images(soup, url)
+            description = self.get_description(soup)
+
+            return dict(title=title, url=url, subtitle=subtitle, images=images,
+                        description=description), 200
+
+        else:
+            return OEMBED_ERRORS['remote_server_error'], 400
+
+    @staticmethod
+    def get_images(soup, url):
+        """ Takes a soup object and search for the relevant images in the
+        document
+
+        @param soup: A beautiful Soup HTML document object
+        @type soup: BeautifulSoup
+        @param url: the original url, used to form absolute links from
+        relative urls
+        @type url: str
+        @return: a list of images
+        @rtype: list
+        """
+        metas = [{'property': 'og:image'},
+                 {'name': 'og:image'}]
+        link = {'rel': 'image_src'}
+        imgs = []
+
+        for m_tag in metas:
+            descr = soup.find_all('meta', attrs=m_tag)
+            if descr:
+                try:
+                    descr_text = descr[0]['content']
+                except IndexError:
+                    continue
+                else:
+                    if not descr_text:
+                        continue
+                    else:
+                        if descr_text.startswith('//'):
+                            descr_text = descr_text.replace('//', 'http://')
+                        imgs.append(descr_text)
+        descr = soup.find_all('link', attrs=link)
+        if descr:
+            try:
+                descr_text = descr[0]['href']
+            except IndexError:
+                pass
+            else:
+                if descr_text:
+                    if descr_text.startswith('//'):
+                            descr_text = descr_text.replace('//', 'http://')
+                    imgs.append(descr_text)
+
+        imgs_tags = soup.find_all('img')[:3]
+        for img in imgs_tags:
+            try:
+                src = img['src']
+            except KeyError:
+                continue
+            if not validate_url(src):
+                if src[0] == '/':
+                    src = get_url_domain(url) + src[1:]
+                elif url[-1] == '/':
+                    src = url + src
+                else:
+                    src = url + '/' + src
+            if src.startswith('//'):
+                src = src.replace('//', 'http://')
+            imgs.append(src)
+        return imgs
+
+    def get_description(self, soup):
+        """
+        Takes a soup object and tries to extract the description of the page
+        @param soup: a Beautiful Soup object
+        @type soup: BeautifulSoup
+        @return: the description of the page, if found
+        @rtype: str
+        """
+        metas = [{'itemprop': 'description'},
+                 {'name': 'description'},
+                 {'property': 'og:description'},
+                 {'name': 'og:description'}]
+        for m_tag in metas:
+            description = self.desc(m_tag, soup)
+            if description:
+                return description
+        else:
+            #No description found
+            return ''
+
+    @staticmethod
+    def desc(meta, soup):
+        """
+        Search a soup object for a specific meta tag
+        @param meta: the meta to search for
+        @param soup: a Beautiful Soup object
+        @type soup: BeautifulSoup
+        @return:
+        """
+        descr = soup.find_all('meta', attrs=meta)
+        if descr:
+            try:
+                descr_text = descr[0]['content']
+            except IndexError:
+                return False
+            else:
+                if not descr_text:
+                    return False
+                else:
+                    return descr_text
+
+    def json_for_link(self, url, _type):
+        """
+        forms a basic dict for a file url
+        @param url: URL of a file
+        @type url: str
+        @param _type: file type
+        @type _type: str
+        @return: a tuple containing a dict and a response code
+        @rtype: tuple
+        """
+        req = urllib2.Request(url, headers={'User-Agent': "Magic Browser"})
+        response = urllib2.urlopen(req)
+        text = response.read()
+        code = response.getcode()
+        if 200 >= code < 300 and text:
+            title = url.split('/')[-1]
+            response = dict(title=title, url=url, type=_type)
+            if _type in ['photo', 'video']:
+                response['width'] = 0
+                response['height'] = 0
+            return self.validate_metadata(response), 200
+        else:
+            return OEMBED_ERRORS['remote_server_error'], 400
+
+    @staticmethod
+    def validate_metadata(embed):
+        """
+        tries to standardize a oEmbed response, checks for fields named
+        different, and adds requiered keys for a valid oEmbed response.
+        If a key is not found, it's created with value 0, or empty.
+        @param embed: a dictionary containing a oEmbed response,
+        or similar response
+        @return: a standarized oEmbed response
+        """
+        emb = embed.copy()
+        if 'author_name' not in emb:
+            emb['author_name'] = ''
+        if 'title' not in emb:
+            emb['title'] = ''
+        if 'description' not in emb:
+            if 'video_description' not in emb:
+                emb['description'] = ''
+            else:
+                emb['description'] = emb['video_description']
+
+        if 'thumbnail_url' not in emb:
+            if 'thumbnail' not in emb:
+                emb['thumbnail_url'] = ''
+                emb['thumbnail_width'] = 0
+                emb['thumbnail_height'] = 0
+            else:
+                emb['thumbnail_url'] = emb['thumbnail']
+        if 'thumbnail_width' not in emb:
+            emb['thumbnail_width'] = 0
+        if 'thumbnail_height' not in emb:
+            emb['thumbnail_height'] = 0
+        emb['thumbnail_width'] = int(emb['thumbnail_width'])
+        emb['thumbnail_height'] = int(emb['thumbnail_height'])
+
+        if emb['thumbnail_url'].startswith('//'):
+            emb['thumbnail_url'] = emb['thumbnail_url'].replace('//', 'http://')
+
+        types_with_sizes = ['photo', 'video', 'rich']
+        if emb['type'] in types_with_sizes:
+            try:
+                emb['width'] = int(emb['width'])
+                emb['height'] = int(emb['height'])
+            except ValueError:
+                emb['width'] = 480
+                emb['height'] = 270
+
+        return emb
+
+
+def test_this():
     consumer = Consumer()
     test_urls = [
         'https://ifttt.com/recipes/107745',
@@ -422,9 +718,21 @@ if __name__ == "__main__":
         'https://twitter.com/chuchoraw/status/440925264923471872',
         'http://wordpress.tv/2013/11/19/joe-dolson-accessibility-and-wordpress-developing-for-the-whole-world/'
     ]
+    import pprint
+
+    pp = pprint.PrettyPrinter(indent=4)
+    keys = []
     for url in test_urls:
         print "\n________________________________"
         print url
         print "\n"
         embed = consumer.get_oembed(url)
-        print embed
+        pp.pprint(embed)
+        keys += embed.keys()
+
+    keys = unique_from_array(keys)
+    print keys
+
+
+if __name__ == "__main__":
+    test_this()
